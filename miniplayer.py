@@ -2,6 +2,7 @@
 import os
 import sys
 import random
+import colored
 import argparse
 import feedparser
 from configparser import ConfigParser, _UNSET
@@ -16,8 +17,15 @@ DEFAULT_CONFIG_FILES = [
     os.path.expanduser('~/.miniplayer.rc'),
     os.path.abspath('./miniplayer.rc')
 ]
+PODCAST_STYLE = colored.fg('red') + colored.attr('bold')
+STREAM_STYLE = colored.fg('blue') + colored.attr('bold')
+_s = colored.stylize
 
 class Logger(object):
+    WARNING_STYLE = colored.fg('orange_4a')
+    ERROR_STYLE = colored.fg('red')
+    INFO_STYLE = colored.fg('green')
+
     def __init__(self, verbose=False):
         self.verbose = verbose
 
@@ -25,14 +33,14 @@ class Logger(object):
         sys.stdout.write('{msg}\n'.format(msg=msg))
 
     def warning(self, msg):
-        sys.stderr.write("[*] {msg}\n".format(msg=msg))
+        sys.stderr.write(_s("[*] {msg}\n".format(msg=msg), self.WARNING_STYLE))
         
     def error(self, msg):
-        sys.stderr.write("[!] {msg}\n".format(msg=msg))
+        sys.stderr.write(_s("[!] {msg}\n".format(msg=msg), self.ERROR_STYLE))
 
     def info(self, msg):
         if self.verbose:
-            sys.stdout.write('[%] {msg}\n'.format(msg=msg))
+            sys.stdout.write(_s('[%] {msg}\n'.format(msg=msg), self.INFO_STYLE))
 
 
 class ListConfigParser(ConfigParser):
@@ -117,7 +125,10 @@ def main():
             desc = ': {}'.format(desc) if desc else ''
             play_type = cp.get(section, 'type', fallback='stream')
 
-            logger.prt("[{}] {}{}".format('P' if play_type == 'podcast' else 'S', section, desc))
+            logger.prt("[{}] {}{}".format(
+                    _s('P', PODCAST_STYLE) if play_type == 'podcast' else _s('S', STREAM_STYLE),
+                    section, desc)
+            )
     elif not cp.has_section(args.name):
         logger.error("Couldn't figure out what to play for name {name}.".format(args.name))
         sys.exit(1)
