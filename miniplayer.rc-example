@@ -1,0 +1,20 @@
+[miniplayer]
+player = mplayer -quiet "{uri}"
+
+[n5md]
+type = stream
+uri = [
+        http://ice4.somafm.com/n5md-128-aac
+        http://ice6.somafm.com/n5md-128-aac
+        http://ice2.somafm.com/n5md-128-aac
+        http://ice1.somafm.com/n5md-128-aac
+    ]
+
+[tal]
+type = podcast
+uri = http://feed.thisamericanlife.org/talpodcast
+
+[fplus]
+type = podcast
+uri = https://thefpl.us/episode/feed
+
