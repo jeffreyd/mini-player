@@ -109,7 +109,16 @@ def main():
     config.update({key: value for key, value in cp.items('miniplayer')})
     logger.info("Base config is {}".format(str(config)))
 
-    if not cp.has_section(args.name):
+    if args.name == '-':
+        logger.info("printing all play targets")
+        for section in cp.sections():
+            if section == 'miniplayer': continue
+            desc = cp.get(section, 'description', fallback=None)
+            desc = ': {}'.format(desc) if desc else ''
+            play_type = cp.get(section, 'type', fallback='stream')
+
+            logger.prt("[{}] {}{}".format('P' if play_type == 'podcast' else 'S', section, desc))
+    elif not cp.has_section(args.name):
         logger.error("Couldn't figure out what to play for name {name}.".format(args.name))
         sys.exit(1)
     else:
