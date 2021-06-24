@@ -79,11 +79,17 @@ def find_href(episode):
     return ret
 
 def validate_arguments(play_type, args, logger):
-    if play_type != 'podcast' and (args.list or args.filter):
-        logger.error('-l/--list and -f/--episode-filter arguments only work for podcasts and you\'re attempting to play a {}'.format(play_type))
+    if play_type != 'podcast' and (args.list or args.filter or args.first_only):
+        logger.error('-l/--list, -f/--episode-filter & -r/--first-only arguments only work '
+                    'for podcasts and you\'re attempting to play a {}'.format(play_type))
         return False
     elif args.list and args.filter:
-        logger.error('-l/--list and -f/--episode-filter are mutually exclusive. they make no sense together')
+        logger.error('-l/--list and -f/--episode-filter are mutually exclusive. they make no '
+                     'sense together')
+        return False
+    elif args.first_only and args.list:
+        logger.error('-r/--first-only and -l/--list are mututally exclusive. they make no '
+                     'sense together')
         return False
 
     return True
@@ -98,6 +104,9 @@ def main():
                     dest='filter', help='Filter for episode title (only for podcasts)')
     ap.add_argument('-l', '--list-episodes', required=False, default=False, dest='list',
                     help='List episodes (only for podcasts)', action='store_true')
+    ap.add_argument('-r', '--first-only', required=False, default=False, dest='first_only',
+                    help='Play only the first episode (only for podcasts)',
+                    action='store_true')
     ap.add_argument('-v', '--verbose', required=False, default=False, dest='verbose',
                     help='Verbose (debug) output.', action='store_true')
     args = ap.parse_args()
@@ -160,6 +169,10 @@ def main():
                         for item in fp['items']:
                             if args.filter in item['title']:
                                 episodes.append(item)
+
+                    if args.first_only:
+                        logger.info("Playing only first episode in the feed.")
+                        episodes = [episodes[0]] if len(episodes) > 1 else []
 
                     logger.info("Playing {} episodes...".format(len(episodes)))
                     for ep in episodes:
